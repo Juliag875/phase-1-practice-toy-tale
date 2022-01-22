@@ -1,5 +1,4 @@
 
-
 let addToy = false;
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -16,19 +15,17 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-
 fetchToys()
-const toyCollection = document.querySelector("#toy-collection")
 
 function fetchToys() {
   fetch('http://localhost:3000/toys')
   .then(response => response.json())
-  .then(toys => toys.forEach(toy => createCards(toy)))
+  .then(toyData => toyData.forEach(toy => createCards(toy)))
 }
 
 function createCards(toys) {
-    const newToy = document.createElement("div")
-    newToy.className = "card"
+    const div = document.createElement("div")
+    div.className = "card"
     
     const toyH2 = document.createElement("h2")
     toyH2.innerText = toys.name
@@ -37,8 +34,8 @@ function createCards(toys) {
     img.src = toys.image
     img.className = "toy-avatar"
 
-    const pLikes = document.createElement("p")
-    pLikes.innerText = toys.likes
+    const p = document.createElement("p")
+    p.innerText = toys.likes
 
     const btn = document.createElement("btn")
     btn.className = "like-btn"
@@ -46,21 +43,45 @@ function createCards(toys) {
     btn.innerText = " ❤️ "
     
     btn.addEventListener("click", () => { 
-      pLikes.innerText = toys.likes++
+      p.innerText = parseInt(toys.likes++)
+      // let number = parseInt(pLikes.innerText)
+      // let newNum = number + 1
+      // pLikes.innerText = newNum
     })
- 
-    toyCollection.appendChild(newToy)
-    newToy.append(toyH2, img, pLikes, btn)
+
+    div.append(toyH2, img, p, btn)
+
+    const toyCollection = document.querySelector("#toy-collection")
+    toyCollection.append(div)  
 }
 
-const newToyForm = document.querySelector(".add-toy-form")
-newToyForm.addEventListener("submit", createToy)
+  
+  function addNewToy(newToyObj){
+    fetch('http://localhost:3000/toys', { 
+      method:'POST', 
+      headers: {
+      "Content-Type": "application/json"
+    },
+      body:JSON.stringify({
+        "name": "Jessie",
+        "image": "https://vignette.wikia.nocookie.net/p__/images/8/88/Jessie_Toy_Story_3.png/revision/latest?cb=20161023024601&path-prefix=protagonist",
+        "likes": 0
+    })
+    .then(response => response.json())
+    .then(toy => addNewToy(toy))
+  })
+  }
 
-function createToy(e) {
-    (e).preventDefault()
-    let newObj = {
-      name: e.target.name.value,
-      img: e.target.image.value,
+  const newToyForm = document.querySelector("form")
+  newToyForm.addEventListener("submit", handleSubmit)
+
+  function handleSubmit(e) {
+      e.preventDefault()
+      const newToyObj = {
+        name:e.target.name.value,
+        image:e.target.image.value,
+        likes:0
+      }
+    createCards(newToyObj)
+    addNewToy(newToyObj)
     }
-  createCards(newObj)
-}
